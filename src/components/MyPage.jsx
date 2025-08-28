@@ -13,6 +13,13 @@ function MyPage() {
         const parsedBookmarks = JSON.parse(storedBookmarks)
         setBookmarks(parsedBookmarks)
       }
+      
+      // 북마크 관련 welfareItems도 로드
+      const storedWelfareItems = localStorage.getItem('welfareBookmarkItems')
+      if (storedWelfareItems) {
+        const parsedWelfareItems = JSON.parse(storedWelfareItems)
+        console.log('welfareBookmarkItems 로드:', parsedWelfareItems.length, '개 항목')
+      }
     } catch (error) {
       console.error('북마크 로드 오류:', error)
     } finally {
@@ -20,7 +27,17 @@ function MyPage() {
     }
   }, [])
 
-  const handleRemoveBookmark = (servId) => {
+  const handleBookmarkClick = (bookmark) => {
+    // 북마크 상세 정보 페이지로 이동
+    navigate('/bookmark-detail', { 
+      state: { bookmarkData: bookmark }
+    })
+  }
+
+  const handleRemoveBookmark = (servId, event) => {
+    // 이벤트 버블링 방지
+    event.stopPropagation()
+    
     // 삭제 확인 메시지
     const isConfirmed = window.confirm('삭제하시겠습니까?')
     
@@ -86,13 +103,17 @@ function MyPage() {
             ) : (
               <div className="space-y-4">
                 {bookmarks.map((bookmark, index) => (
-                  <div key={bookmark.servId || index} className="bg-gray-100 rounded-lg p-4">
+                  <div 
+                    key={bookmark.servId || index} 
+                    className="bg-gray-100 rounded-lg p-4 cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleBookmarkClick(bookmark)}
+                  >
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-semibold text-lg text-gray-800 flex-1 mr-4">
                         {bookmark.title}
                       </h3>
                       <button
-                        onClick={() => handleRemoveBookmark(bookmark.servId)}
+                        onClick={(e) => handleRemoveBookmark(bookmark.servId, e)}
                         className="text-red-500 hover:text-red-700 text-sm font-medium"
                       >
                         삭제

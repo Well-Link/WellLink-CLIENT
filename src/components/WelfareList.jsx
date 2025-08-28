@@ -3,19 +3,29 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 // 상세 정보 모달 컴포넌트
-const DetailModal = ({ isOpen, onClose, detailData, loading }) => {
+const DetailModal = ({ isOpen, onClose, detailData, loading, welfareItems }) => {
   const [isBookmarked, setIsBookmarked] = useState(false)
   
   // 북마크 저장 함수
   const handleBookmark = () => {
-    if (!detailData) return
+    console.log('🔍 북마크 함수 시작')
+    console.log('detailData:', detailData)
+    console.log('welfareItems:', welfareItems)
+    
+    if (!detailData || !detailData.servId) {
+      console.log('❌ detailData 또는 servId가 없습니다')
+      alert('북마크할 수 있는 데이터가 없습니다.')
+      return
+    }
     
     try {
       // 기존 북마크 목록 가져오기
       const existingBookmarks = JSON.parse(localStorage.getItem('welfareBookmarks') || '[]')
+      console.log('기존 북마크 목록:', existingBookmarks)
       
       // 이미 저장된 북마크인지 확인
       const isAlreadyBookmarked = existingBookmarks.some(bookmark => bookmark.servId === detailData.servId)
+      console.log('이미 북마크된 항목인가?', isAlreadyBookmarked)
       
       if (isAlreadyBookmarked) {
         // 이미 저장된 경우 제거
@@ -23,6 +33,13 @@ const DetailModal = ({ isOpen, onClose, detailData, loading }) => {
         localStorage.setItem('welfareBookmarks', JSON.stringify(updatedBookmarks))
         setIsBookmarked(false)
         alert('북마크가 제거되었습니다.')
+        
+        // welfareBookmarkItems에서도 해당 항목 제거
+        const existingBookmarkItems = JSON.parse(localStorage.getItem('welfareBookmarkItems') || '[]')
+        const updatedBookmarkItems = existingBookmarkItems.filter(item => item.servId !== detailData.servId)
+        localStorage.setItem('welfareBookmarkItems', JSON.stringify(updatedBookmarkItems))
+        console.log('✅ welfareBookmarkItems에서 항목 제거:', detailData.title)
+        console.log('업데이트된 welfareBookmarkItems:', updatedBookmarkItems)
       } else {
         // 새로운 북마크 추가
         const newBookmark = {
@@ -33,9 +50,69 @@ const DetailModal = ({ isOpen, onClose, detailData, loading }) => {
         localStorage.setItem('welfareBookmarks', JSON.stringify(updatedBookmarks))
         setIsBookmarked(true)
         alert('북마크에 저장되었습니다.')
+        
+        // welfareItems에서 일치하는 항목 찾기 및 welfareBookmarkItems에 저장
+        if (welfareItems && welfareItems.length > 0) {
+          console.log('welfareItems에서 일치하는 항목 검색 중...')
+          console.log('찾을 servId:', detailData.servId)
+          console.log('전체 welfareItems:', welfareItems)
+          
+          // servId로 일치하는 항목 찾기
+          const matchingItem = welfareItems.find(item => item.servId === detailData.servId)
+          
+          if (matchingItem) {
+            console.log('✅ 일치하는 항목 발견:', matchingItem)
+            
+            // 기존 welfareBookmarkItems 가져오기
+            const existingBookmarkItems = JSON.parse(localStorage.getItem('welfareBookmarkItems') || '[]')
+            console.log('기존 welfareBookmarkItems:', existingBookmarkItems)
+            
+            // 이미 저장된 항목인지 확인
+            const isAlreadyStored = existingBookmarkItems.some(item => item.servId === matchingItem.servId)
+            console.log('이미 welfareBookmarkItems에 저장된 항목인가?', isAlreadyStored)
+            
+            if (!isAlreadyStored) {
+              // 새로운 항목 추가
+              const updatedBookmarkItems = [...existingBookmarkItems, matchingItem]
+              localStorage.setItem('welfareBookmarkItems', JSON.stringify(updatedBookmarkItems))
+              console.log('✅ welfareBookmarkItems에 새 항목 추가 성공:', matchingItem.title)
+              console.log('업데이트된 welfareBookmarkItems:', updatedBookmarkItems)
+            } else {
+              console.log('이미 welfareBookmarkItems에 저장된 항목입니다:', matchingItem.title)
+            }
+          } else {
+            console.log('❌ welfareItems에서 일치하는 항목을 찾을 수 없습니다')
+            console.log('찾으려는 servId:', detailData.servId)
+            console.log('welfareItems의 servId들:', welfareItems.map(item => item.servId))
+            
+            // 일치하는 항목이 없어도 detailData를 기반으로 저장
+            const existingBookmarkItems = JSON.parse(localStorage.getItem('welfareBookmarkItems') || '[]')
+            const fallbackItem = {
+              servId: detailData.servId,
+              title: detailData.title,
+              summary: detailData.benefitContent || '상세 정보에서 가져온 서비스',
+              provider: detailData.provider,
+              bookmarkedAt: new Date().toISOString()
+            }
+            
+            const isAlreadyStored = existingBookmarkItems.some(item => item.servId === fallbackItem.servId)
+            if (!isAlreadyStored) {
+              const updatedBookmarkItems = [...existingBookmarkItems, fallbackItem]
+              localStorage.setItem('welfareBookmarkItems', JSON.stringify(updatedBookmarkItems))
+              console.log('✅ fallback으로 welfareBookmarkItems에 항목 추가:', fallbackItem.title)
+            }
+          }
+        } else {
+          console.log('❌ welfareItems가 비어있거나 없습니다')
+        }
       }
       
-      console.log('북마크 목록:', JSON.parse(localStorage.getItem('welfareBookmarks') || '[]'))
+      // 최종 저장 결과 확인
+      const finalBookmarks = JSON.parse(localStorage.getItem('welfareBookmarks') || '[]')
+      const finalBookmarkItems = JSON.parse(localStorage.getItem('welfareBookmarkItems') || '[]')
+      console.log('최종 북마크 목록:', finalBookmarks)
+      console.log('최종 welfareBookmarkItems:', finalBookmarkItems)
+      
     } catch (error) {
       console.error('북마크 저장 오류:', error)
       alert('북마크 저장에 실패했습니다.')
@@ -534,6 +611,7 @@ function WelfareList() {
         onClose={() => setIsModalOpen(false)}
         detailData={detailData}
         loading={modalLoading}
+        welfareItems={welfareItems}
       />
     </div>
   )
