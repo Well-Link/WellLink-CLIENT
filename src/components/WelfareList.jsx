@@ -2,6 +2,202 @@ import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
+// 상세 정보 모달 컴포넌트
+const DetailModal = ({ isOpen, onClose, detailData, loading }) => {
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  
+  // 북마크 저장 함수
+  const handleBookmark = () => {
+    if (!detailData) return
+    
+    try {
+      // 기존 북마크 목록 가져오기
+      const existingBookmarks = JSON.parse(localStorage.getItem('welfareBookmarks') || '[]')
+      
+      // 이미 저장된 북마크인지 확인
+      const isAlreadyBookmarked = existingBookmarks.some(bookmark => bookmark.servId === detailData.servId)
+      
+      if (isAlreadyBookmarked) {
+        // 이미 저장된 경우 제거
+        const updatedBookmarks = existingBookmarks.filter(bookmark => bookmark.servId !== detailData.servId)
+        localStorage.setItem('welfareBookmarks', JSON.stringify(updatedBookmarks))
+        setIsBookmarked(false)
+        alert('북마크가 제거되었습니다.')
+      } else {
+        // 새로운 북마크 추가
+        const newBookmark = {
+          ...detailData,
+          bookmarkedAt: new Date().toISOString()
+        }
+        const updatedBookmarks = [...existingBookmarks, newBookmark]
+        localStorage.setItem('welfareBookmarks', JSON.stringify(updatedBookmarks))
+        setIsBookmarked(true)
+        alert('북마크에 저장되었습니다.')
+      }
+      
+      console.log('북마크 목록:', JSON.parse(localStorage.getItem('welfareBookmarks') || '[]'))
+    } catch (error) {
+      console.error('북마크 저장 오류:', error)
+      alert('북마크 저장에 실패했습니다.')
+    }
+  }
+  
+  // 컴포넌트가 열릴 때 북마크 상태 확인
+  useEffect(() => {
+    if (detailData && detailData.servId) {
+      const existingBookmarks = JSON.parse(localStorage.getItem('welfareBookmarks') || '[]')
+      const isAlreadyBookmarked = existingBookmarks.some(bookmark => bookmark.servId === detailData.servId)
+      setIsBookmarked(isAlreadyBookmarked)
+    }
+  }, [detailData])
+  
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* 반투명 오버레이 */}
+      <div 
+        className="absolute inset-0 bg-black/50"
+      ></div>
+      
+      {/* 모달 컨텐츠 */}
+      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-800">복지 서비스 상세 정보</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+          >
+            ×
+          </button>
+        </div>
+        
+        {/* 로딩 상태 */}
+        {loading && (
+          <div className="p-8 text-center">
+            <div className="text-lg text-gray-600">상세 정보를 불러오는 중...</div>
+          </div>
+        )}
+        
+        {/* 상세 정보 */}
+        {!loading && detailData && (
+          <div className="p-6 space-y-6">
+                         {/* 서비스 제목 */}
+             <div>
+               <h3 className="text-lg font-semibold text-gray-800 mb-2">서비스명</h3>
+               <p className="text-gray-700 leading-relaxed">
+                 {detailData.title || '제목 정보가 없습니다'}
+               </p>
+             </div>
+            
+                         {/* 제공기관 */}
+             <div>
+               <h3 className="text-lg font-semibold text-gray-800 mb-2">제공기관</h3>
+               <p className="text-gray-700">
+                 {detailData.provider || '제공기관 정보가 없습니다'}
+               </p>
+             </div>
+            
+                         {/* 지원대상 */}
+             <div>
+               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원대상</h3>
+               <div className="bg-gray-50 p-4 rounded-lg">
+                 <p className="text-gray-700 whitespace-pre-line">
+                   {detailData.targetsDetail || '지원대상 정보가 없습니다'}
+                 </p>
+               </div>
+             </div>
+            
+                         {/* 지원내용 */}
+             <div>
+               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원내용</h3>
+               <div className="bg-blue-50 p-4 rounded-lg">
+                 <p className="text-gray-700 whitespace-pre-line">
+                   {detailData.benefitContent || '지원내용 정보가 없습니다'}
+                 </p>
+               </div>
+             </div>
+            
+                         {/* 지원기준 */}
+             <div>
+               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원기준</h3>
+               <div className="bg-yellow-50 p-4 rounded-lg">
+                 <p className="text-gray-700 whitespace-pre-line">
+                   {detailData.criteria || '지원기준 정보가 없습니다'}
+                 </p>
+               </div>
+             </div>
+            
+                         {/* 지원주기 */}
+             <div>
+               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원주기</h3>
+               <p className="text-gray-700">
+                 {detailData.supportCycle || '지원주기 정보가 없습니다'}
+               </p>
+             </div>
+            
+            {/* 연락처 */}
+            {detailData.contacts && detailData.contacts.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">연락처</h3>
+                <div className="flex flex-wrap gap-2">
+                  {detailData.contacts.map((contact, index) => (
+                    <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                      {contact}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* 사이트 링크 */}
+            {detailData.siteLinks && detailData.siteLinks.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">관련 사이트</h3>
+                <div className="space-y-2">
+                  {detailData.siteLinks.map((link, index) => (
+                    <a
+                      key={index}
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-blue-600 hover:text-blue-800 underline break-all"
+                    >
+                      {link}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+                 {/* 북마크 및 닫기 버튼 */}
+         <div className="p-6 border-t border-gray-200 space-y-3">
+           <button
+             onClick={handleBookmark}
+             disabled={!detailData}
+             className={`w-full py-3 px-4 rounded-lg transition-colors ${
+               isBookmarked 
+                 ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+                 : 'bg-blue-500 text-white hover:bg-blue-600'
+             } ${!detailData ? 'opacity-50 cursor-not-allowed' : ''}`}
+           >
+             {isBookmarked ? '북마크 제거' : '북마크에 저장'}
+           </button>
+           <button
+             onClick={onClose}
+             className="w-full bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors"
+           >
+             닫기
+           </button>
+         </div>
+      </div>
+    </div>
+  )
+}
+
 function WelfareList() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -13,12 +209,19 @@ function WelfareList() {
   const [detailError, setDetailError] = useState('')
   const [detailFallbackLink, setDetailFallbackLink] = useState('')
   const pageSize = 6
+  
+  // 모달 상태 추가
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [detailData, setDetailData] = useState(null)
+  const [modalLoading, setModalLoading] = useState(false)
 
   useEffect(() => {
     try {
       if (location.state?.data?.items) {
         setWelfareItems(location.state.data.items)
-        // 캐시 유지: localStorage 삭제하지 않음
+        // 새로운 데이터가 오면 localStorage에 저장 (삭제하지 않음)
+        localStorage.setItem('welfareItems', JSON.stringify(location.state.data.items))
+        console.log('✅ 새로운 데이터로 localStorage 저장 완료')
         setLoading(false)
         return
       }
@@ -40,6 +243,15 @@ function WelfareList() {
   useEffect(() => {
     setCurrentPage(1)
   }, [welfareItems])
+
+  // 컴포넌트가 언마운트될 때 로컬스토리지 삭제
+  useEffect(() => {
+    return () => {
+      // 다른 페이지로 이동할 때 로컬스토리지 삭제
+      localStorage.removeItem('welfareItems')
+      console.log('✅ 페이지 이동으로 localStorage 삭제 완료')
+    }
+  }, [])
 
   const totalPages = Math.max(1, Math.ceil(welfareItems.length / pageSize))
   const startIndex = (currentPage - 1) * pageSize
@@ -120,7 +332,26 @@ function WelfareList() {
 
     try {
       setDetailLoadingId(item.servId)
-      await requestWelfareDetail(item.servId)
+      setModalLoading(true)
+      setIsModalOpen(true) // 모달을 먼저 열고 로딩 상태 표시
+      
+             const result = await requestWelfareDetail(item.servId)
+       
+       // null 값 처리: 모든 필드가 null인 경우 기본값 설정
+       const processedData = {
+         ...result,
+         title: result.title || '제목 정보 없음',
+         provider: result.provider || '제공기관 정보 없음',
+         targetsDetail: result.targetsDetail || '지원대상 정보 없음',
+         benefitContent: result.benefitContent || '지원내용 정보 없음',
+         criteria: result.criteria || '지원기준 정보 없음',
+         supportCycle: result.supportCycle || '지원주기 정보 없음',
+         contacts: result.contacts || [],
+         siteLinks: result.siteLinks || []
+       }
+       
+       console.log('처리된 데이터:', processedData)
+       setDetailData(processedData)
     } catch (err) {
       const raw = err?.response?.data
       const msg = typeof raw === 'string' && raw.includes('UnrecognizedPropertyException')
@@ -130,8 +361,10 @@ function WelfareList() {
       if (item.link) {
         setDetailFallbackLink(item.link)
       }
+      setIsModalOpen(false) // 에러 시 모달 닫기
     } finally {
       setDetailLoadingId(null)
+      setModalLoading(false)
     }
   }
 
@@ -278,8 +511,14 @@ function WelfareList() {
             </div>
           )}
           
-          {/* Back Button */}
-          <div className="mt-6">
+          {/* My Page and Back Buttons */}
+          <div className="mt-6 space-y-3">
+            <button
+              onClick={() => navigate('/mypage')}
+              className="w-full h-[60px] bg-blue-500 text-white text-xl font-semibold rounded-[10px] hover:bg-blue-600 transition-colors"
+            >
+              마이 페이지로 이동
+            </button>
             <button
               onClick={handleBack}
               className="w-full h-[60px] bg-gray-400 text-white text-xl font-semibold rounded-[10px] hover:bg-gray-500 transition-colors"
@@ -289,6 +528,13 @@ function WelfareList() {
           </div>
         </div>
       </div>
+      {/* 상세 정보 모달 */}
+      <DetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        detailData={detailData}
+        loading={modalLoading}
+      />
     </div>
   )
 }

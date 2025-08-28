@@ -10,7 +10,7 @@ function GetStart() {
   
   const handleMyPage = () => {
     // 마이페이지 라우트가 추가되면 여기에 경로를 설정
-    alert('마이페이지는 준비 중입니다.')
+    navigate('/mypage')
   }
   
   return (
