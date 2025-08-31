@@ -7,12 +7,11 @@ export default defineConfig({
   plugins: [tailwindcss(),react()],
   server: {
     proxy: {
-      '/health': {
-        target: 'http://localhost:8080', // 로컬 API 서버
+      '/api': {
+        target: 'http://localhost:8080', // 로컬 개발용
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/health/, '/health'),
-        // 느린 외부 API를 중계할 때 게이트웨이 타임아웃 완화
+        rewrite: (path) => path.replace(/^\/api/, ''),
         timeout: 30000,
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq) => {
@@ -21,5 +20,11 @@ export default defineConfig({
         }
       }
     }
+  },
+  define: {
+    // 환경 변수 정의
+    __API_BASE_URL__: JSON.stringify(process.env.NODE_ENV === 'production' 
+      ? 'https://welllink-server-1.onrender.com' 
+      : 'http://localhost:8080')
   }
 })

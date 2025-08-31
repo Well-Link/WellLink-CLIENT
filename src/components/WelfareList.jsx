@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { createApiUrl, API_ENDPOINTS } from '../config/api'
 
 // 상세 정보 모달 컴포넌트
 const DetailModal = ({ isOpen, onClose, detailData, loading, welfareItems }) => {
@@ -160,59 +161,59 @@ const DetailModal = ({ isOpen, onClose, detailData, loading, welfareItems }) => 
         {/* 상세 정보 */}
         {!loading && detailData && (
           <div className="p-6 space-y-6">
-                         {/* 서비스 제목 */}
-             <div>
-               <h3 className="text-lg font-semibold text-gray-800 mb-2">서비스명</h3>
-               <p className="text-gray-700 leading-relaxed">
-                 {detailData.title || '제목 정보가 없습니다'}
-               </p>
-             </div>
+            {/* 서비스 제목 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">서비스명</h3>
+              <p className="text-gray-700 leading-relaxed">
+                {detailData.title || '제목 정보가 없습니다'}
+              </p>
+            </div>
             
-                         {/* 제공기관 */}
-             <div>
-               <h3 className="text-lg font-semibold text-gray-800 mb-2">제공기관</h3>
-               <p className="text-gray-700">
-                 {detailData.provider || '제공기관 정보가 없습니다'}
-               </p>
-             </div>
+            {/* 제공기관 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">제공기관</h3>
+              <p className="text-gray-700">
+                {detailData.provider || '제공기관 정보가 없습니다'}
+              </p>
+            </div>
             
-                         {/* 지원대상 */}
-             <div>
-               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원대상</h3>
-               <div className="bg-gray-50 p-4 rounded-lg">
-                 <p className="text-gray-700 whitespace-pre-line">
-                   {detailData.targetsDetail || '지원대상 정보가 없습니다'}
-                 </p>
-               </div>
-             </div>
+            {/* 지원대상 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">지원대상</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-700 whitespace-pre-line">
+                  {detailData.targetsDetail || '지원대상 정보가 없습니다'}
+                </p>
+              </div>
+            </div>
             
-                         {/* 지원내용 */}
-             <div>
-               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원내용</h3>
-               <div className="bg-blue-50 p-4 rounded-lg">
-                 <p className="text-gray-700 whitespace-pre-line">
-                   {detailData.benefitContent || '지원내용 정보가 없습니다'}
-                 </p>
-               </div>
-             </div>
+            {/* 지원내용 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">지원내용</h3>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-gray-700 whitespace-pre-line">
+                  {detailData.benefitContent || '지원내용 정보가 없습니다'}
+                </p>
+              </div>
+            </div>
             
-                         {/* 지원기준 */}
-             <div>
-               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원기준</h3>
-               <div className="bg-yellow-50 p-4 rounded-lg">
-                 <p className="text-gray-700 whitespace-pre-line">
-                   {detailData.criteria || '지원기준 정보가 없습니다'}
-                 </p>
-               </div>
-             </div>
+            {/* 지원기준 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">지원기준</h3>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-gray-700 whitespace-pre-line">
+                  {detailData.criteria || '지원기준 정보가 없습니다'}
+                </p>
+              </div>
+            </div>
             
-                         {/* 지원주기 */}
-             <div>
-               <h3 className="text-lg font-semibold text-gray-800 mb-2">지원주기</h3>
-               <p className="text-gray-700">
-                 {detailData.supportCycle || '지원주기 정보가 없습니다'}
-               </p>
-             </div>
+            {/* 지원주기 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">지원주기</h3>
+              <p className="text-gray-700">
+                {detailData.supportCycle || '지원주기 정보가 없습니다'}
+              </p>
+            </div>
             
             {/* 연락처 */}
             {detailData.contacts && detailData.contacts.length > 0 && (
@@ -250,26 +251,26 @@ const DetailModal = ({ isOpen, onClose, detailData, loading, welfareItems }) => 
           </div>
         )}
         
-                 {/* 북마크 및 닫기 버튼 */}
-         <div className="p-6 border-t border-gray-200 space-y-3">
-           <button
-             onClick={handleBookmark}
-             disabled={!detailData}
-             className={`w-full py-3 px-4 rounded-lg transition-colors ${
-               isBookmarked 
-                 ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
-                 : 'bg-blue-500 text-white hover:bg-blue-600'
-             } ${!detailData ? 'opacity-50 cursor-not-allowed' : ''}`}
-           >
-             {isBookmarked ? '북마크 제거' : '북마크에 저장'}
-           </button>
-           <button
-             onClick={onClose}
-             className="w-full bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors"
-           >
-             닫기
-           </button>
-         </div>
+        {/* 북마크 및 닫기 버튼 */}
+        <div className="p-6 border-t border-gray-200 space-y-3">
+          <button
+            onClick={handleBookmark}
+            disabled={!detailData}
+            className={`w-full py-3 px-4 rounded-lg transition-colors ${
+              isBookmarked 
+                ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            } ${!detailData ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isBookmarked ? '북마크 제거' : '북마크에 저장'}
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            닫기
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -338,11 +339,11 @@ function WelfareList() {
   async function requestWelfareDetail(servId) {
     const params = { servId }
     const queryString = new URLSearchParams(params).toString()
-    const fullUrl = `/health/welfare-detail?${queryString}`
+    const fullUrl = createApiUrl(API_ENDPOINTS.health.welfareDetail) + `?${queryString}`
 
     console.log('========== 상세 API 요청 정보 =========')
     console.log('메서드: GET')
-    console.log('엔드포인트: /health/welfare-detail')
+    console.log('엔드포인트:', API_ENDPOINTS.health.welfareDetail)
     console.log('파라미터:', params)
     console.log('전체 요청 URL:', fullUrl)
     console.log('=====================================')
@@ -354,7 +355,7 @@ function WelfareList() {
     while (attempt < maxRetries) {
       attempt += 1
       try {
-        const res = await axios.get('/health/welfare-detail', {
+        const res = await axios.get(createApiUrl(API_ENDPOINTS.health.welfareDetail), {
           params,
           timeout: 10000,
           headers: {
@@ -412,23 +413,23 @@ function WelfareList() {
       setModalLoading(true)
       setIsModalOpen(true) // 모달을 먼저 열고 로딩 상태 표시
       
-             const result = await requestWelfareDetail(item.servId)
-       
-       // null 값 처리: 모든 필드가 null인 경우 기본값 설정
-       const processedData = {
-         ...result,
-         title: result.title || '제목 정보 없음',
-         provider: result.provider || '제공기관 정보 없음',
-         targetsDetail: result.targetsDetail || '지원대상 정보 없음',
-         benefitContent: result.benefitContent || '지원내용 정보 없음',
-         criteria: result.criteria || '지원기준 정보 없음',
-         supportCycle: result.supportCycle || '지원주기 정보 없음',
-         contacts: result.contacts || [],
-         siteLinks: result.siteLinks || []
-       }
-       
-       console.log('처리된 데이터:', processedData)
-       setDetailData(processedData)
+      const result = await requestWelfareDetail(item.servId)
+      
+      // null 값 처리: 모든 필드가 null인 경우 기본값 설정
+      const processedData = {
+        ...result,
+        title: result.title || '제목 정보 없음',
+        provider: result.provider || '제공기관 정보 없음',
+        targetsDetail: result.targetsDetail || '지원대상 정보 없음',
+        benefitContent: result.benefitContent || '지원내용 정보 없음',
+        criteria: result.criteria || '지원기준 정보 없음',
+        supportCycle: result.supportCycle || '지원주기 정보 없음',
+        contacts: result.contacts || [],
+        siteLinks: result.siteLinks || []
+      }
+      
+      console.log('처리된 데이터:', processedData)
+      setDetailData(processedData)
     } catch (err) {
       const raw = err?.response?.data
       const msg = typeof raw === 'string' && raw.includes('UnrecognizedPropertyException')
