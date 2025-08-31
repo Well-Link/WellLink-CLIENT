@@ -63,7 +63,7 @@ function MyPage() {
   if (loading) {
     return (
       <div className="bg-[#F9FAFB] min-h-screen flex justify-center">
-        <div className="w-[768px] h-[1080px] bg-white flex flex-col relative">
+        <div className="w-full max-w-[768px] min-h-screen bg-white flex flex-col relative">
           <div className="w-full h-[90px] flex items-center px-7 shadow-md">
             <h1 className="text-2xl font-normal text-black">Well-Link</h1>
           </div>
@@ -77,7 +77,7 @@ function MyPage() {
 
   return (
     <div className="bg-[#F9FAFB] min-h-screen flex justify-center">
-      <div className="w-[768px] h-[1080px] bg-white flex flex-col relative">
+      <div className="w-full max-w-[768px] min-h-screen bg-white flex flex-col relative">
         {/* Header */}
         <div className="w-full h-[90px] flex items-center px-7 shadow-md">
           <h1 className="text-2xl font-normal text-black">Well-Link</h1>
@@ -92,7 +92,7 @@ function MyPage() {
           </div>
 
           {/* Bookmarks List */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pb-4">
             {bookmarks.length === 0 ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">

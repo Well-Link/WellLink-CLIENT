@@ -142,8 +142,8 @@ function PersonalInfo() {
   }
 
   return (
-    <div className="bg-[#F9FAFB] min-h-screen flex justify-center">
-      <div className="w-[768px] h-[1080px] bg-white flex flex-col relative">
+    <div className="bg-[#F9FAFB] h-screen flex justify-center">
+      <div className="w-full max-w-[768px] h-full bg-white flex flex-col relative">
         {/* Header */}
         <div className="w-full h-[90px] flex items-center px-7 shadow-md">
           <h1 className="text-2xl font-normal text-black">Well-Link</h1>
